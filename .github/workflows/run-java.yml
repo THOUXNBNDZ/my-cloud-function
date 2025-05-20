@@ -1,0 +1,25 @@
+name: Run Java File
+
+on:
+  push:
+    branches: [Main]
+
+jobs:
+  build-and-run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          
+      - name: Compile Java code
+        run: javac src/Main.java
+
+      - name: Run Java program
+        run: java -cp src Main
