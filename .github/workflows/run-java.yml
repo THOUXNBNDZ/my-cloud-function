@@ -2,7 +2,7 @@ name: Run Java File
 
 on:
   push:
-    branches: [Main]
+    branches: [main]
 
 jobs:
   build-and-run:
