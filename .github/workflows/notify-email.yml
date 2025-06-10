@@ -1,0 +1,21 @@
+name: Email Notification
+
+on:
+  workflow_dispatch: # manual trigger
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send email
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: GitHub Notification
+          to: binrashad@icloud.com
+          from: GitHub Actions <${{ secrets.EMAIL_USERNAME }}>
+          body: |
+            🎉 This is a test email from your GitHub Action!
