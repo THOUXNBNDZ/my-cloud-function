@@ -1,21 +1,43 @@
-name: Email Notification
+name: Send Email via Microsoft Graph
 
 on:
-  workflow_dispatch: # manual trigger
+  workflow_dispatch:
 
 jobs:
-  notify:
+  send_email:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Send email
-        uses: dawidd6/action-send-mail@v3
-        with:
-          server_address: smtp.gmail.com
-          server_port: 465
-          username: ${{ secrets.EMAIL_USERNAME }}
-          password: ${{ secrets.EMAIL_PASSWORD }}
-          subject: GitHub Notification
-          to: binrashad@icloud.com
-          from: GitHub Actions <${{ secrets.EMAIL_USERNAME }}>
-          body: |
-            🎉 This is a test email from your GitHub Action!
+      - name: Get Access Token
+        id: auth
+        run: |
+          TOKEN_RESPONSE=$(curl -X POST -H "Content-Type: application/x-www-form-urlencoded" \
+            -d "client_id=${{ secrets.CLIENT_ID }}" \
+            -d "scope=https://graph.microsoft.com/.default" \
+            -d "client_secret=${{ secrets.CLIENT_SECRET }}" \
+            -d "grant_type=client_credentials" \
+            https://login.microsoftonline.com/${{ secrets.TENANT_ID }}/oauth2/v2.0/token)
+
+          echo "token=$(echo $TOKEN_RESPONSE | jq -r .access_token)" >> $GITHUB_OUTPUT
+
+      - name: Send Email
+        run: |
+          curl -X POST https://graph.microsoft.com/v1.0/users/${{ secrets.EMAIL_FROM }}/sendMail \
+            -H "Authorization: Bearer ${{ steps.auth.outputs.token }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "message": {
+                "subject": "✅ GitHub Workflow Succeeded",
+                "body": {
+                  "contentType": "Text",
+                  "content": "Your GitHub Action workflow completed successfully!"
+                },
+                "toRecipients": [
+                  {
+                    "emailAddress": {
+                      "address": "'"${{ secrets.EMAIL_TO }}"'"
+                    }
+                  }
+                ]
+              }
+            }'
