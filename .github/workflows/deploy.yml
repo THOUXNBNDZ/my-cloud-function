@@ -20,5 +20,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+      - name: Print Deployment
+        run: echo "Project Deployed"
       - name: Simulate deployment
         run: echo "Deploying to production..."
